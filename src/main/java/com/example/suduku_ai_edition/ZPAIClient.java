@@ -66,6 +66,11 @@ public class ZPAIClient implements InitializingBean {
         }
     }
 
+    /**
+     * 简单请求
+     * @param message
+     * @return
+     */
     public Object sendRequest(String message){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON); // 设置请求体类型为JSON
@@ -81,6 +86,12 @@ public class ZPAIClient implements InitializingBean {
         return handleResponse(responseEntity);
     }
 
+    /**
+     * 带文件请求
+     * @param message
+     * @param filePath
+     * @return
+     */
     public Object sendRequest(String message, String filePath){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON); // 设置请求体类型为JSON

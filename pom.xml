@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>suduku_AI_Edition</artifactId>
+    <artifactId>ZPAIDEMO</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>suduku_AI_Edition</name>
     <description>suduku_AI_Edition</description>
