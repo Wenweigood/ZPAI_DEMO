@@ -55,6 +55,11 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.78</version> <!-- 请替换为实际的最新版本号，如1.2.78或更高 -->
         </dependency>
+        <!-- Spring Boot WebFlux Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>

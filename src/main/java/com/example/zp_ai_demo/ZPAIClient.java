@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 import java.util.*;
@@ -112,6 +115,34 @@ public class ZPAIClient implements InitializingBean {
         HttpEntity<Object> entity = new HttpEntity<>(paramMap, headers);
         ResponseEntity<ZPAIResponse> responseEntity = restTemplate.postForEntity(zhipuPath +"stream_sync", entity, ZPAIResponse.class);
         return handleResponse(responseEntity);
+    }
+
+    public Object sendStreamingRequest(String message){
+        WebClient webClient = WebClient.create(zhipuPath);
+
+        webClient = webClient.mutate()
+                .defaultHeader(HttpHeaders.ACCEPT, MediaType.TEXT_EVENT_STREAM_VALUE)
+                .defaultHeader("Authorization", "Bearer "+accessToken)
+                .build();
+
+        paramMapBuilder paramMapBuilder = new paramMapBuilder();
+        Map<String, Object> paramMap = paramMapBuilder.addParam("prompt", message)
+                .addParam("assistant_id", assistant_id)
+                .build();
+
+        Mono<String> responseMono = webClient.post()
+                .uri("/some-endpoint")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paramMap) // 将POJO对象序列化为JSON并作为请求体发送
+                .retrieve()
+                .bodyToMono(String.class);
+
+        responseMono.subscribe(
+                response -> System.out.println("Server response: " + response),
+                error -> System.err.println("Error occurred: " + error.getMessage()),
+                () -> System.out.println("POST request completed")
+        );
+        return handleResponse(null);
     }
 
     static class paramMapBuilder implements Serializable {

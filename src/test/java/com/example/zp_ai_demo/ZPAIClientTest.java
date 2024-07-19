@@ -39,4 +39,9 @@ class ZPAIClientTest {
     void sendFileTest() {
         ZPAIClient.sendRequest("请告诉我附件的图片是什么", "C:\\Users\\温威\\Pictures\\IMG_8085.PNG");
     }
+
+    @Test
+    void sendStreamRequestTest() {
+        ZPAIClient.sendStreamingRequest("中国目前的人口数量");
+    }
 }
