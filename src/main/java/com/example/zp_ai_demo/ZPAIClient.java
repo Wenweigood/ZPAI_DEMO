@@ -1,9 +1,9 @@
-package com.example.suduku_ai_edition;
+package com.example.zp_ai_demo;
 
-import com.example.suduku_ai_edition.entity.Content;
-import com.example.suduku_ai_edition.entity.Output;
-import com.example.suduku_ai_edition.entity.Result;
-import com.example.suduku_ai_edition.entity.ZPAIResponse;
+import com.example.zp_ai_demo.entity.Content;
+import com.example.zp_ai_demo.entity.Output;
+import com.example.zp_ai_demo.entity.Result;
+import com.example.zp_ai_demo.entity.ZPAIResponse;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -44,7 +44,7 @@ public class ZPAIClient implements InitializingBean {
     private String assistant_id;
 
     /**
-     * token
+     * token 有效期10天
      */
     private String accessToken = "";
 
@@ -67,7 +67,7 @@ public class ZPAIClient implements InitializingBean {
     }
 
     /**
-     * 简单请求
+     * 一个简单的请求
      * @param message
      * @return
      */
@@ -130,6 +130,11 @@ public class ZPAIClient implements InitializingBean {
         }
     }
 
+    /**
+     * 处理返回体
+     * @param responseEntity
+     * @return
+     */
     @Nonnull
     public String handleResponse(ResponseEntity<ZPAIResponse> responseEntity) {
         try {
@@ -155,7 +160,7 @@ public class ZPAIClient implements InitializingBean {
     }
 
     /**
-     * 上传文件
+     * 上传文件方法
      * @return file_id
      */
     @Nullable

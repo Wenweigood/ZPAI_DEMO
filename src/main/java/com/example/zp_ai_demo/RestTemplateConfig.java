@@ -1,4 +1,4 @@
-package com.example.suduku_ai_edition;
+package com.example.zp_ai_demo;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

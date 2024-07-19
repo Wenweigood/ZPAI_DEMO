@@ -1,4 +1,4 @@
-package com.example.suduku_ai_edition.entity;
+package com.example.zp_ai_demo.entity;
 
 import lombok.Data;
 import lombok.ToString;

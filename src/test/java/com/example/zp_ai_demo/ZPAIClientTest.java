@@ -1,4 +1,4 @@
-package com.example.suduku_ai_edition;
+package com.example.zp_ai_demo;
 
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
