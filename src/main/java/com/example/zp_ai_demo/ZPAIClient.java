@@ -1,9 +1,7 @@
 package com.example.zp_ai_demo;
 
-import com.example.zp_ai_demo.entity.Content;
-import com.example.zp_ai_demo.entity.Output;
-import com.example.zp_ai_demo.entity.Result;
-import com.example.zp_ai_demo.entity.ZPAIResponse;
+import com.alibaba.fastjson.JSON;
+import com.example.zp_ai_demo.entity.*;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -22,8 +20,19 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.nio.charset.StandardCharsets;
 
 import java.io.Serializable;
+import java.net.URI;
+import java.net.http.HttpClient;
 import java.util.*;
 
 @Service
@@ -117,32 +126,40 @@ public class ZPAIClient implements InitializingBean {
         return handleResponse(responseEntity);
     }
 
-    public Object sendStreamingRequest(String message){
-        WebClient webClient = WebClient.create(zhipuPath);
-
-        webClient = webClient.mutate()
-                .defaultHeader(HttpHeaders.ACCEPT, MediaType.TEXT_EVENT_STREAM_VALUE)
-                .defaultHeader("Authorization", "Bearer "+accessToken)
-                .build();
+    public void sendStreamingRequest(String message){
 
         paramMapBuilder paramMapBuilder = new paramMapBuilder();
         Map<String, Object> paramMap = paramMapBuilder.addParam("prompt", message)
                 .addParam("assistant_id", assistant_id)
                 .build();
 
-        Mono<String> responseMono = webClient.post()
-                .uri("/some-endpoint")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(paramMap) // 将POJO对象序列化为JSON并作为请求体发送
-                .retrieve()
-                .bodyToMono(String.class);
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(zhipuPath + "stream"))
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer "+accessToken)
+                // 假设需要POST一些数据
+                .POST(HttpRequest.BodyPublishers.ofString(JSON.toJSONString(paramMap)))
+                .build();
 
-        responseMono.subscribe(
-                response -> System.out.println("Server response: " + response),
-                error -> System.err.println("Error occurred: " + error.getMessage()),
-                () -> System.out.println("POST request completed")
-        );
-        return handleResponse(null);
+        client.sendAsync(request, BodyHandlers.ofInputStream())
+                .thenApply(HttpResponse::body)
+                .thenAccept(inputStream -> {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            // 假设每行都是一个完整的JSON对象
+                            // 这里可以使用Jackson或Gson来解析line到Java对象
+//                            System.out.println("Received: " + line);
+                            if(line.startsWith("data:")){
+                                Result result = JSON.parseObject(line.substring(5).trim(), Result.class);
+                                System.out.println(handleResponse(result));
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }).join();
     }
 
     static class paramMapBuilder implements Serializable {
@@ -177,6 +194,24 @@ public class ZPAIClient implements InitializingBean {
                     .flatMap(List::stream)
                     .map(Content::getResult)
                     .reduce((a, b) -> a + "\n" + b)
+                    .orElse("");
+        } catch (NullPointerException e){
+            log.info(e.getMessage());
+        }
+        return "";
+    }
+
+    /**
+     * 处理流式返回体
+     * @param result
+     * @return
+     */
+    @Nonnull
+    public String handleResponse(Result result) {
+        try {
+            return Optional.ofNullable(result).map(Result::getMessage)
+                    .map(Message::getContent)
+                    .map(Content::getResult)
                     .orElse("");
         } catch (NullPointerException e){
             log.info(e.getMessage());

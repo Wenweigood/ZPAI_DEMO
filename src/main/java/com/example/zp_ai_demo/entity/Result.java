@@ -13,4 +13,6 @@ public class Result {
     private String status;
 
     private List<Output> output;
+
+    private Message message;
 }
