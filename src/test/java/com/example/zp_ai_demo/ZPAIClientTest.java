@@ -42,6 +42,11 @@ class ZPAIClientTest {
 
     @Test
     void sendStreamRequestTest() {
-        ZPAIClient.sendStreamingRequest("中国目前的人口数量");
+        ZPAIClient.sendStreamingRequestWithHttpClient("中国目前的人口数量");
+    }
+
+    @Test
+    void sendStreamRequestTest2() {
+        ZPAIClient.sendStreamingRequestWithAWebClient("中国目前的人口数量");
     }
 }

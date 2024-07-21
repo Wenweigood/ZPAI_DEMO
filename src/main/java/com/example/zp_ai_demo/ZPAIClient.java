@@ -30,6 +30,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 
+
 import java.io.Serializable;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -126,7 +127,7 @@ public class ZPAIClient implements InitializingBean {
         return handleResponse(responseEntity);
     }
 
-    public void sendStreamingRequest(String message){
+    public void sendStreamingRequestWithHttpClient(String message){
 
         paramMapBuilder paramMapBuilder = new paramMapBuilder();
         Map<String, Object> paramMap = paramMapBuilder.addParam("prompt", message)
@@ -160,6 +161,34 @@ public class ZPAIClient implements InitializingBean {
                         e.printStackTrace();
                     }
                 }).join();
+    }
+
+    public void sendStreamingRequestWithAWebClient(String message){
+
+        WebClient webClient = WebClient.create(zhipuPath);
+
+        webClient = webClient.mutate()
+                .defaultHeader(HttpHeaders.ACCEPT, MediaType.TEXT_EVENT_STREAM_VALUE)
+                .defaultHeader("Authorization", "Bearer "+accessToken)
+                .build();
+
+        paramMapBuilder paramMapBuilder = new paramMapBuilder();
+        Map<String, Object> paramMap = paramMapBuilder.addParam("prompt", message)
+                .addParam("assistant_id", assistant_id)
+                .build();
+
+        Mono<String> responseMono = webClient.post()
+                .uri("stream")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(paramMap) // 将POJO对象序列化为JSON并作为请求体发送
+                .retrieve()
+                .bodyToMono(String.class);
+
+        responseMono.subscribe(
+                response -> System.out.println("Server response: " + response),
+                error -> System.err.println("Error occurred: " + error.getMessage()),
+                () -> System.out.println("POST request completed")
+        );
     }
 
     static class paramMapBuilder implements Serializable {
