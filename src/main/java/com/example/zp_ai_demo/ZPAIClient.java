@@ -137,6 +137,7 @@ public class ZPAIClient implements InitializingBean {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(zhipuPath + "stream"))
+                .header("Accept", "text/event-stream")
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer "+accessToken)
                 // 假设需要POST一些数据
@@ -152,7 +153,7 @@ public class ZPAIClient implements InitializingBean {
                             // 假设每行都是一个完整的JSON对象
                             // 这里可以使用Jackson或Gson来解析line到Java对象
 //                            System.out.println("Received: " + line);
-                            if(line.startsWith("data:")){
+                            if(!line.trim().isEmpty() && line.startsWith("data:")){
                                 Result result = JSON.parseObject(line.substring(5).trim(), Result.class);
                                 System.out.println(handleResponse(result));
                             }

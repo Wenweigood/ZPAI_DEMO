@@ -8,7 +8,10 @@ public class Message {
 
     private String id;
 
+    private String role;
+
     private String status;
 
     private Content content;
+
 }
